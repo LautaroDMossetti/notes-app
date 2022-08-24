@@ -1,0 +1,7 @@
+PUT http://localhost:3001/api/notes/62be20b7d9266657351e86f7
+Content-Type: application/json
+
+{
+    "content": "suscribe con prime que es gratis",
+    "important": true
+}
