@@ -1,7 +1,4 @@
-/* eslint-disable testing-library/no-render-in-setup */
-/* eslint-disable testing-library/prefer-screen-queries */
-/* eslint-disable testing-library/no-node-access */
-/* eslint-disable testing-library/no-container */
+/* eslint-disable no-use-before-define */
 import '@testing-library/jest-dom/extend-expect'
 import { fireEvent, render } from '@testing-library/react'
 import Togglable from './Togglable'
