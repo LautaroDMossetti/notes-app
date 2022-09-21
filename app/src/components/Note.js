@@ -1,18 +1,22 @@
+import { Link } from 'react-router-dom'
+import { Button } from './styledComponents/Button'
+
 const Note = ({ note, editNote }) => {
   const handleImportanceChange = () => {
     note.important = !note.important
 
-    // Change in database
-    editNote(note)
+    editNote(note).catch(e => {
+      console.error(e)
+    })
   }
 
   return (
     <li>
       <p>id: {note.id}</p>
-      <p>{note.content}</p>
+      <Link to={`/notes/${note.id}`}>{note.content}</Link>
       <small>{note.date}</small>
       <br />
-      <button onClick={handleImportanceChange}>{note.important ? 'make not important' : 'make important'}</button>
+      <Button onClick={handleImportanceChange}>{note.important ? 'make not important' : 'make important'}</Button>
     </li>
   )
 }

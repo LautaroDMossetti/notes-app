@@ -17,7 +17,12 @@ const CreateNoteForm = ({ addNote }) => {
       important: false
     }
 
-    addNote(noteToAddToState)
+    try {
+      addNote(noteToAddToState)
+    } catch (e) {
+      console.error(e)
+    }
+
     setNewNote('')
     togglableRef.current.toggleVisibility()
   }

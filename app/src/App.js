@@ -1,145 +1,63 @@
 import './App.css'
+import React from 'react'
+import { Link, BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
+import Notes from './Notes'
+import NoteDetail from './components/NoteDetail'
+import Login from './Login'
+import { useUser } from './hooks/useUser'
+import { StyledLink } from './components/styledComponents/StyledLink'
 
-import { useEffect, useState } from 'react'
-import noteService from './services/noteService'
-import loginService from './services/loginService'
-import LoginForm from './components/LoginForm'
-import CreateNoteForm from './components/CreateNoteForm'
-import NoteList from './components/NoteList'
+const Home = () => <h1>Home Page</h1>
 
-function App () {
-  const [notes, setNotes] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+const Users = () => <h1>Users</h1>
 
-  const [user, setUser] = useState(null)
+const App = () => {
+  const { user, logoutUser, loginUser } = useUser()
 
-  useEffect(() => {
-    console.log('useEffect')
-
-    setLoading(true)
-
-    console.log('timeout')
-
-    noteService.getAllNotes().then(notes => {
-      setNotes(notes)
-
-      setLoading(false)
-    })
-  }, [])
-
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteAppUser')
-
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      noteService.setToken(user.token)
-    }
-  }, [])
-
-  const handleLogout = () => {
-    setUser(null)
-    noteService.setToken(null)
-    window.localStorage.removeItem('loggedNoteAppUser')
+  const inlinesStyles = {
+    padding: 5
   }
-
-  const addNote = (noteToAddToState) => {
-    console.log('crear nota')
-
-    setError('')
-
-    noteService.createNote(noteToAddToState)
-      .then(newNote => {
-        setNotes(prevNotes => prevNotes.concat(newNote))
-      }).catch(e => {
-        console.error(e)
-
-        setError('la API ha petado')
-      })
-  }
-
-  const editNote = (editedNote) => {
-    console.log('editar nota')
-
-    setError('')
-
-    noteService.editNote(editedNote)
-      .then(editedNote => {
-        setNotes(prevNotes => {
-          return prevNotes.map(note => {
-            if (note.id === editedNote.id) {
-              note = editedNote
-            }
-
-            return note
-          })
-        })
-      }).catch(e => {
-        console.error(e)
-
-        setError('la API ha petado')
-      })
-  }
-
-  const login = async (username, password) => {
-    try {
-      const user = await loginService.login({ username, password })
-
-      window.localStorage.setItem(
-        'loggedNoteAppUser', JSON.stringify(user)
-      )
-
-      noteService.setToken(user.token)
-
-      setUser(user)
-
-      console.log(user)
-    } catch (e) {
-      setError('Wrong credentials')
-      setTimeout(() => {
-        setError(null)
-      }, 5000)
-    }
-  }
-
-  console.log('render')
 
   /* eslint-disable react/jsx-indent */
   return (
+    <BrowserRouter>
+      <header>
+        <StyledLink to='/' style={inlinesStyles}>
+          Home
+        </StyledLink>
+        <StyledLink to='/notes' variant='bold' style={inlinesStyles}>
+          Notes
+        </StyledLink>
+        <Link to='/users' style={inlinesStyles}>
+          Users
+        </Link>
+        {
+          user
+            ? <em>Logged as {user.name}</em>
+            : <Link to='/login' style={inlinesStyles}>
+                Login
+              </Link>
+        }
 
-    <div>
+      </header>
 
-      <h1>Notes</h1>
+      <Routes>
+        <Route path='/notes/:noteId' element={<NoteDetail />} />
 
-      {loading ? 'Cargando...' : ''}
+        <Route path='/notes' element={<Notes user={user} logoutUser={logoutUser} />} />
 
-      {error ? <span>{error}</span> : ''}
+        <Route path='/users' element={<Users />} />
 
-      {user
-        ? <div>
+        <Route
+          path='/login' element={
+            user ? <Navigate to='/' replace /> : <Login loginUser={loginUser} />
+          }
+        />
 
-          <div>
-            <button onClick={handleLogout}>
-              Logout
-            </button>
-          </div>
+        <Route path='/' element={<Home />} />
+      </Routes>
 
-          <CreateNoteForm
-            addNote={addNote}
-          />
-
-          <NoteList notes={notes} editNote={editNote} />
-
-          </div>
-        : <div>
-
-          <LoginForm
-            login={login}
-          />
-
-          </div>}
-    </div>
+    </BrowserRouter>
   )
 }
 
